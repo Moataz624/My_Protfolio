@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Space Portfolio | Moataz</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Cairo:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --planet-size: 260px;
+      --planet-left: 40px;
+      --bg-start: #06203a;
+      --bg-end: #021328;
+      --glow-color: rgba(125,211,252,0.14);
+      --card-bg-start: #072033;
+      --card-bg-end: #041423;
+      --accent-grad: linear-gradient(to right,#7dd3fc,#a78bfa);
+      --glass: rgba(2,19,40,0.88);
+    }
+
+    *{box-sizing:border-box;scroll-behavior:smooth}
+    html,body{height:100%}
+    body{
+      margin:0;
+      min-height:100vh;
+      font-family:'Cairo',sans-serif;
+      background: linear-gradient(180deg, var(--bg-start) 0%, var(--bg-end) 100%);
+      color:#e6f0fb;
+      overflow-x:hidden;
+    }
+
+    /* ================= Header (sticky) ================= */
+    header{
+      width:100%;
+      position:sticky;
+      top:0;
+      background:var(--glass);
+      backdrop-filter:blur(8px);
+      z-index:120;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      max-width:1100px;
+      margin:auto;
+      padding:14px 20px;
+      border-bottom:1px solid rgba(255,255,255,0.04);
+    }
+    header h1{ font-family:'Orbitron',sans-serif; color:#9bd3ff; margin:0; font-size:1.1rem }
+    nav a{ margin:0 10px; color:#b7dff7; text-decoration:none; font-weight:500;}
+    nav a:hover{ color:white; }
+    .resume-btn{
+      background:var(--accent-grad);
+      color:#012;
+      border:none;
+      padding:9px 16px;
+      border-radius:20px;
+      cursor:pointer;
+      font-weight:700;
+      text-decoration:none;
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+    }
+    /* Project visit button (matches resume look) */
+    .project-visit{ background:var(--accent-grad); color:#012; border:none; padding:8px 14px; border-radius:14px; font-weight:700; text-decoration:none; display:inline-flex; align-items:center; gap:8px; }
+
+    /* ================= Stars Canvas ================= */
+    canvas#stars{
+      position:fixed; inset:0; width:100%; height:100%; z-index:0; background:transparent; display:block;
+    }
+
+    /* ================= Hero ================= */
+    .hero{
+      max-width:1100px;
+      margin:auto;
+      position:relative;
+      padding:60px 20px;
+      min-height:420px;
+      z-index:2;
+    }
+
+    .planet-wrap{
+      width: var(--planet-size);
+      height: var(--planet-size);
+      position: absolute;
+      left: var(--planet-left);
+      top:50%;
+      transform: translateY(-50%);
+      pointer-events:none;
+      z-index:2;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+    }
+    .planet {
+      width:100%; height:100%;
+      border-radius:50%; overflow:hidden; position:relative;
+      box-shadow: 0 12px 40px rgba(2,6,23,0.7), 0 0 30px rgba(0,0,0,0.4);
+      animation: sway 8s ease-in-out infinite;
+    }
+    .planet img{ width:110%; height:110%; object-fit:cover; display:block; transition:transform 0.6s ease; }
+    .planet-wrap::before{
+      content:''; position:absolute; left:50%; top:50%; transform:translate(-50%,-50%);
+      width:140%; height:140%; border-radius:50%; background: var(--glow-color); filter: blur(18px); z-index:1;
+    }
+    @keyframes sway{
+      0%,100%{ transform: translateX(0) translateY(0) rotate(-0.2deg); }
+      25%{ transform: translateX(-8px) translateY(-4px) rotate(-0.6deg); }
+      50%{ transform: translateX(0) translateY(0) rotate(0.2deg); }
+      75%{ transform: translateX(8px) translateY(4px) rotate(0.6deg); }
+    }
+
+  .hero-content{ max-width:60%; z-index:4; padding-left:420px; } /* increased padding for spacing from planet */
+    .hero h2{ font-size:2rem; color:white; margin:0 0 12px 0; line-height:1.15; }
+  .hero h2 .accent{ background:var(--accent-grad); -webkit-background-clip:text; background-clip:text; color:transparent; display:inline-block; }
+    .hero p{ margin:0; opacity:0.9; font-size:1.05rem; max-width:520px }
+
+  /* ================= Intro section (video + about) ================= */
+  .intro-section{ max-width:1100px; margin:40px auto; padding:0 20px; display:flex; gap:28px; align-items:center; flex-wrap:wrap; z-index:3; }
+  .intro-content{ flex:1 1 320px; min-width:260px; color:#e6f6ff; }
+  .intro-content h3{ margin-top:0; font-size:1.3rem; color:#ffffff }
+  .intro-content p{ color:#cfeaf9; opacity:0.95; line-height:1.5 }
+  .intro-content .watch-btn{ margin-top:14px; }
+  .intro-video{ flex:1 1 420px; max-width:640px; border-radius:12px; overflow:hidden; box-shadow:0 12px 40px rgba(2,6,23,0.6); background:#000; }
+  .intro-video video{ width:100%; height:auto; display:block; }
+  @media (max-width:900px){ .intro-section{ flex-direction:column-reverse; gap:18px; } .intro-video{ width:100%; } }
+
+  /* Modal overrides (re-using modal styles) */
+  .modal-overlay{ display:none; align-items:center; justify-content:center; position:fixed; inset:0; background:rgba(1,4,12,0.75); z-index:500; }
+  .modal-overlay.show{ display:flex; }
+  .modal{ width:min(920px,94%); background:linear-gradient(180deg,var(--card-bg-start),var(--card-bg-end)); padding:12px; border-radius:10px; box-shadow:0 20px 60px rgba(2,6,23,0.7); }
+
+    /* ================= Sections + reveal animation ================= */
+    .section{ max-width:1100px; margin:60px auto; padding:0 20px; position:relative; z-index:3; opacity:0; transform:translateY(28px); transition:all .8s ease; }
+    .section.visible{ opacity:1; transform:translateY(0); }
+
+    /* ================= Cards (used for Projects / Education / Certificates) ================= */
+    .projects{ display:grid; grid-template-columns:repeat(auto-fit,minmax(250px,1fr)); gap:20px; }
+    .card{
+      background:linear-gradient(180deg,var(--card-bg-start),var(--card-bg-end));
+      padding:18px;
+      border-radius:14px;
+      border:1px solid rgba(255,255,255,0.05);
+      box-shadow:0 0 12px rgba(125,211,252,0.06);
+      transition: transform .32s, box-shadow .32s;
+      min-height:80px;
+      display:flex;
+      flex-direction:column;
+      justify-content:center;
+    }
+    .card:hover{ transform:translateY(-6px); box-shadow:0 0 24px rgba(125,211,252,0.12); }
+
+    /* ================= Skills (two boxes side-by-side) ================= */
+    .skills-container{
+      display:grid;
+      grid-template-columns:repeat(auto-fit,minmax(300px,1fr));
+      gap:20px;
+    }
+    .skills-box{
+      background:linear-gradient(180deg,var(--card-bg-start),var(--card-bg-end));
+      border-radius:12px;
+      padding:18px;
+      box-shadow:0 0 12px rgba(125,211,252,0.08);
+    }
+    .skills-box h4{ margin-top:0; margin-bottom:10px; }
+    .skill-item{ display:flex; gap:12px; align-items:center; margin-bottom:14px; }
+    .skill-meta{ display:flex; gap:10px; align-items:center; width:40%; min-width:140px; }
+    .skill-meta img.skill-logo{
+      width:26px; height:26px; object-fit:contain; border-radius:6px; background:transparent;
+      display:inline-block;
+    }
+    /* placeholder for empty logos */
+    .logo-placeholder{
+      width:26px; height:26px; border-radius:6px; border:1px dashed rgba(255,255,255,0.08);
+      display:inline-flex; align-items:center; justify-content:center; font-size:9px; color:#9fbfdc;
+    }
+
+    .progress-bar{ flex:1; background:#07223a; border-radius:10px; height:10px; overflow:hidden; }
+    .progress{ height:100%; background:linear-gradient(to right,#7dd3fc,#a78bfa); transition:width .8s ease; }
+
+    /* ================= Education cards: add logo + text ================= */
+    .edu-card{ display:flex; gap:12px; align-items:center; }
+    .edu-logo-wrap{ width:56px; height:56px; border-radius:10px; overflow:hidden; flex-shrink:0; display:flex; align-items:center; justify-content:center; background:rgba(255,255,255,0.02); border:1px dashed rgba(255,255,255,0.03); }
+    .edu-logo-wrap img{ width:100%; height:100%; object-fit:contain; display:block; }
+    .edu-text small{ color:#9fbfdc; display:block; margin-top:6px; font-size:0.92rem; opacity:0.95 }
+
+    /* ================= Certificates modal/ popup ================= */
+    .modal-overlay{
+      position:fixed; inset:0; background:rgba(1,4,12,0.65); display:flex; align-items:center; justify-content:center;
+      z-index:400; opacity:0; pointer-events:none; transition:opacity .28s ease;
+    }
+    .modal-overlay.show{ opacity:1; pointer-events:auto; }
+    .modal{
+      width:min(920px,94%); height:min(720px,86%); background:linear-gradient(180deg,var(--card-bg-start),var(--card-bg-end));
+      border-radius:12px; padding:14px; box-shadow:0 20px 60px rgba(2,6,23,0.7); position:relative; display:flex; flex-direction:column;
+      animation: modalIn .28s ease;
+    }
+    @keyframes modalIn{ from{ transform:translateY(10px); opacity:0 } to{ transform:translateY(0); opacity:1 } }
+    .modal .modal-top{ display:flex; justify-content:space-between; align-items:center; gap:12px; padding-bottom:8px; border-bottom:1px solid rgba(255,255,255,0.03); }
+    .modal .modal-top h4{ margin:0 }
+    .modal .modal-body{ flex:1; margin-top:12px; display:flex; gap:12px; }
+    .pdf-view{ flex:1; border-radius:6px; overflow:hidden; background:#061424; position:relative; display:flex; align-items:center; justify-content:center; }
+    .pdf-view iframe{ width:100%; height:100%; border:0; display:block; }
+    .modal .modal-actions{ display:flex; gap:8px; margin-top:12px; justify-content:flex-end; }
+    .close-x{ background:transparent; border:0; font-size:20px; cursor:pointer; color:#d6eefc; }
+
+    /* ================= Let's Connect (footer area) ================= */
+    .connect{
+      display:flex; gap:14px; align-items:center; justify-content:center; margin-top:20px; flex-wrap:wrap;
+    }
+    .connect a{ display:inline-flex; gap:8px; align-items:center; padding:8px 12px; border-radius:10px; background:rgba(255,255,255,0.02); color:#e6f0fb; text-decoration:none; border:1px solid rgba(255,255,255,0.03); }
+    .connect a .icon{ width:18px; height:18px; opacity:0.95; display:inline-block; }
+
+    /* ================= Creative Footer ================= */
+    footer{ display:block; }
+    .site-footer{
+      position:relative; z-index:3; color:#d8eefc; margin-top:40px;
+      background: linear-gradient(180deg, rgba(2,19,40,0.9), rgba(1,10,20,0.95));
+      padding:48px 20px; border-top:1px solid rgba(255,255,255,0.04); overflow:hidden;
+      font-size:0.95rem; text-align:left;
+    }
+    .site-footer .footer-wave{ position:absolute; top:-1px; left:0; width:100%; height:72px; pointer-events:none; opacity:0.45; }
+    .footer-inner{ max-width:1100px; margin:0 auto; display:flex; gap:24px; align-items:center; justify-content:space-between; flex-wrap:wrap; }
+    .footer-motto{ max-width:680px; }
+    .footer-motto h4{ margin:0; font-size:1.25rem; color:#ffffff; line-height:1.18; }
+  .footer-motto h4 .accent{ background:var(--accent-grad); -webkit-background-clip:text; background-clip:text; color:transparent; display:inline-block; }
+    .footer-motto p{ margin:8px 0 0; color:#9fbfdc; opacity:0.95; }
+    .footer-actions{ display:flex; gap:12px; align-items:center; flex-wrap:wrap; justify-content:flex-end; }
+    .footer-actions .connect a{ background:transparent; border:1px solid rgba(255,255,255,0.04); padding:10px 14px; border-radius:10px; color:#e6f0fb; text-decoration:none; display:inline-flex; align-items:center; gap:8px; }
+  .connect .icon{ width:18px; height:18px; fill:#b7dff7; display:inline-block; }
+  .connect a:hover .icon{ fill:#ffffff; }
+  .sr-only{ position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
+    .footer-bottom{ margin-top:18px; text-align:center; font-size:0.9rem; color:#9fbfdc; opacity:0.95; }
+    .heart{ display:inline-block; transform-origin:center center; animation:beat 1.6s infinite; }
+    @keyframes beat{ 0%,100%{ transform:scale(1) } 50%{ transform:scale(1.08) } }
+
+    @media (max-width:760px){
+      .footer-inner{ flex-direction:column; gap:12px; align-items:center; }
+      .footer-motto{ text-align:center; }
+      .footer-actions{ justify-content:center; }
+    }
+
+    /* Contact form send button styling */
+    .send-btn{ display:inline-flex; margin-top:6px; padding:10px 18px; border-radius:18px; font-weight:700; cursor:pointer; border:none; }
+
+    /* Responsive tweaks */
+    @media (max-width:980px){
+      .hero-content{ padding-left:0; max-width:100% }
+      .hero{ padding:40px 14px; min-height:300px; }
+      .planet-wrap{ display:none; }
+      .skill-meta{ width:48%; min-width:110px }
+    }
+  </style>
+</head>
+<body>
+  <canvas id="stars"></canvas>
+
+  <!-- ============== Header ============== -->
+  <header>
+    <h1>Moataz Ahmed</h1>
+    <nav>
+      <a href="#about">About</a>
+      <a href="#skills">Skills</a>
+      <a href="#education">Education</a>
+      <a href="#certificates">Certificates</a>
+      <a href="#projects">Projects</a>
+      <a href="#contact">Contact</a>
+      <!-- Resume file placeholder (you uploaded original resume PDF earlier) -->
+      <a class="resume-btn" href="Moataz-Ahmed-Ramadan-Said-FlowCV-Resume-20251006.pdf" target="_blank">Resume</a>
+    </nav>
+  </header>
+
+  <!-- ============== Hero ============== -->
+  <section class="hero" aria-labelledby="hero-title">
+    <div class="planet-wrap" aria-hidden="true">
+      <div class="planet">
+  <!-- PLACEHOLDER planet image (replace src with your photo file) -->
+  <img src="WhatsApp_Image_2025-04-29_at_15.57.59_45225b3d-removebg-preview (1).png" alt="Moataz" id="hero-photo">
+        <!-- Example: replace with "moataz-photo.png" -->
+      </div>
+    </div>
+
+    <div class="hero-content">
+      <h2 id="hero-title">
+        <span class="accent">Let’s build your next standout website</span><br>
+        — fast, modern, and creative.
+      </h2>
+      <p>Hi — I'm Moataz. I craft polished, responsive web experiences that help businesses stand out online and convert visitors into customers. Need a product landing page, portfolio, or full web app? I turn ideas into pixel-perfect reality.</p>
+      <!-- (Hero buttons removed as requested) -->
+    </div>
+  </section>
+
+  <!-- ============== Intro Section (with local video) ============== -->
+ 
+
+  <!-- (Intro modal removed — 'Watch Intro' opens Drive directly) -->
+
+  <!-- ============== About Section ============== -->
+  <section id="about" class="section">
+    <h3>About Me</h3>
+    <p>I'm a Computer Science student at Beni-Suef University and also studying at the American University in Cairo. I specialize in full-stack web development using ASP.NET, and I'm passionate about building efficient, scalable, and user-friendly web applications. Through initiatives like Digital Egypt Pioneers, I've developed strong communication, teamwork, and presentation skills that help me thrive in any environment. I'm always eager to learn, grow, and contribute to innovative projects that make a real impact.</p>
+  <div class="watch-btn">
+        <!-- Direct link to Google Drive preview: opens immediately in a new tab per request -->
+        <a id="open-intro" class="resume-btn" href="https://drive.google.com/file/d/1a_RK99DGQCbqLKIwk4peS2eO1AZUWCTH/view?usp=sharing" target="_blank" rel="noopener">Watch Intro</a>
+      </div>
+  </section>
+
+  <!-- ============== Skills Section ============== -->
+  <section id="skills" class="section">
+    <h3>Skills</h3>
+    <div class="skills-container">
+      <!-- Technical Skills Box -->
+      <!-- Put icon files in: d:\My Website\assets\icons\ (e.g. html.png, css.png, js.png, dotnet.png, sql.png, python.png) -->
+      <div class="skills-box">
+        <h4>Technical Skills</h4>
+
+        <!-- Skill: HTML -->
+        <div class="skill-item">
+          <div class="skill-meta">
+            <!-- icon: assets/icons/html.png -->
+            <img class="skill-logo" src="html.png" alt="HTML logo" onerror="this.style.display='none'">
+            <div class="logo-placeholder" aria-hidden="true">logo</div>
+            <strong>HTML5</strong>
+          </div>
+          <div class="progress-bar"><div class="progress" style="width:90%"></div></div>
+        </div>
+
+        <!-- Skill: CSS -->
+        <div class="skill-item">
+          <div class="skill-meta">
+            <!-- icon: assets/icons/css.png -->
+            <img class="skill-logo" src="css.png" alt="CSS logo" onerror="this.style.display='none'">
+            <div class="logo-placeholder" aria-hidden="true">logo</div>
+            <strong>CSS</strong>
+          </div>
+          <div class="progress-bar"><div class="progress" style="width:85%"></div></div>
+        </div>
+
+        <!-- Skill: JavaScript -->
+        <div class="skill-item">
+          <div class="skill-meta">
+            <!-- icon: assets/icons/js.png -->
+            <img class="skill-logo" src="js.png" alt="JS logo" onerror="this.style.display='none'">
+            <div class="logo-placeholder" aria-hidden="true">logo</div>
+            <strong>JavaScript</strong>
+          </div>
+          <div class="progress-bar"><div class="progress" style="width:80%"></div></div>
+        </div>
+
+        <!-- Skill: .NET / C# -->
+        <div class="skill-item">
+          <div class="skill-meta">
+            <!-- icon: assets/icons/dotnet.png -->
+            <img class="skill-logo" src="net.png" alt=".NET logo" onerror="this.style.display='none'">
+            <div class="logo-placeholder" aria-hidden="true">logo</div>
+            <strong>.NET / C#</strong>
+          </div>
+          <div class="progress-bar"><div class="progress" style="width:88%"></div></div>
+        </div>
+
+        <!-- Skill: SQL Server -->
+        <div class="skill-item">
+          <div class="skill-meta">
+            <!-- icon: assets/icons/sql.png -->
+            <img class="skill-logo" src="sql.png" alt="SQL logo" onerror="this.style.display='none'">
+            <div class="logo-placeholder" aria-hidden="true">logo</div>
+            <strong>SQL Server</strong>
+          </div>
+          <div class="progress-bar"><div class="progress" style="width:78%"></div></div>
+        </div>
+
+        <!-- Skill: Python -->
+        <div class="skill-item">
+          <div class="skill-meta">
+            <img class="skill-logo" src="django.png" alt="Python logo" onerror="this.style.display='none'">
+            <div class="logo-placeholder" aria-hidden="true">logo</div>
+            <strong>Python / Django</strong>
+          </div>
+          <div class="progress-bar"><div class="progress" style="width:75%"></div></div>
+        </div>
+
+      </div>
+
+      <!-- Soft Skills Box -->
+      <div class="skills-box">
+        <h4>Soft Skills</h4>
+        <div class="skill-item">
+          <div class="skill-meta">
+            <img class="skill-logo" src="assets/icons/communication.svg" alt="communication" onerror="this.style.display='none'">
+            <div class="logo-placeholder" aria-hidden="true">logo</div>
+            <strong>Communication</strong>
+          </div>
+          <div class="progress-bar"><div class="progress" style="width:95%"></div></div>
+        </div>
+
+        <div class="skill-item">
+          <div class="skill-meta">
+            <img class="skill-logo" src="assets/icons/problem-solving.svg" alt="problem solving" onerror="this.style.display='none'">
+            <div class="logo-placeholder" aria-hidden="true">logo</div>
+            <strong>Problem Solving</strong>
+          </div>
+          <div class="progress-bar"><div class="progress" style="width:88%"></div></div>
+        </div>
+
+        <div class="skill-item">
+          <div class="skill-meta">
+            <img class="skill-logo" src="assets/icons/critical-thinking.svg" alt="critical thinking" onerror="this.style.display='none'">
+            <div class="logo-placeholder" aria-hidden="true">logo</div>
+            <strong>Critical Thinking</strong>
+          </div>
+          <div class="progress-bar"><div class="progress" style="width:85%"></div></div>
+        </div>
+
+        <div class="skill-item">
+          <div class="skill-meta">
+            <img class="skill-logo" src="assets/icons/time-management.svg" alt="time management" onerror="this.style.display='none'">
+            <div class="logo-placeholder" aria-hidden="true">logo</div>
+            <strong>Time Management</strong>
+          </div>
+          <div class="progress-bar"><div class="progress" style="width:90%"></div></div>
+        </div>
+
+        <div class="skill-item">
+          <div class="skill-meta">
+            <img class="skill-logo" src="assets/icons/presentation.svg" alt="presentation" onerror="this.style.display='none'">
+            <div class="logo-placeholder" aria-hidden="true">logo</div>
+            <strong>Presentation & Branding</strong>
+          </div>
+          <div class="progress-bar"><div class="progress" style="width:87%"></div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============== Education Section ============== -->
+  <section id="education" class="section">
+    <h3>Education</h3>
+    <div class="projects">
+      <!-- Card: AUC (placeholder for AUC logo) -->
+      <div class="card edu-card">
+        <div class="edu-logo-wrap">
+          <!-- PLACEHOLDER: put your AUC logo here (e.g. auc-logo.png) -->
+          <img src="download.png" alt="AUC logo" onerror="this.style.display='none'">
+          <div class="logo-placeholder" aria-hidden="true">AUC</div>
+        </div>
+        <div class="edu-text">
+          <strong>The American University in Cairo (AUC)</strong>
+          <small>2024 – Present — General English Program (B1B)</small>
+        </div>
+      </div>
+
+      <!-- Card: Beni-Suef University -->
+      <div class="card edu-card">
+        <div class="edu-logo-wrap">
+          <!-- PLACEHOLDER: BSU logo already provided by you can replace src -->
+          <img src="download (1).png" alt="BSU logo" onerror="this.style.display='none'">
+          <div class="logo-placeholder" aria-hidden="true">BSU</div>
+        </div>
+        <div class="edu-text">
+          <strong>Beni-Suef University</strong>
+          <small>2022 – 2026 — Faculty of Computer Science and Artificial Intelligence</small>
+        </div>
+      </div>
+
+      <!-- Card: DEPI -->
+      <div class="card edu-card">
+        <div class="edu-logo-wrap">
+          <!-- PLACEHOLDER: DEPI logo (you provided) -->
+          <img src="download (2).png" alt="DEPI logo" onerror="this.style.display='none'">
+          <div class="logo-placeholder" aria-hidden="true">DEPI</div>
+        </div>
+        <div class="edu-text">
+          <strong>Digital Egypt Pioneers Initiative (DEPI)</strong>
+          <small>06/2025 – 12/2025 — Advanced technical & professional training</small>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============== Certificates Section ============== -->
+  <section id="certificates" class="section">
+    <h3>Certificates</h3>
+    <div class="projects">
+      <!-- Certificate Card: PLACEHOLDER PDF link stored in data-pdf -->
+      <div class="card">
+        <strong>MEC Intro to Software Engineering — 2023</strong>
+        <div style="margin-top:12px; display:flex; gap:8px; align-items:center;">
+          <!-- data-pdf currently empty: replace with actual pdf link later -->
+                   <img src="Screenshot 2025-10-17 040649.png" width="30%" height="80%"/>
+          <a class="resume-btn" href="Moataz Ahmed Ramadan.pdf" target="_blank" rel="noopener" aria-disabled="true">Open in new tab</a>
+        </div>
+      </div>
+
+      <div class="card">
+        <strong>General English at AUC — B1B 2025</strong>
+        <div style="margin-top:12px; display:flex; gap:8px; align-items:center;">
+         <img src="Screenshot 2025-10-17 040637.png" width="30%" height="80%"/>
+          <a class="resume-btn" href="file_20250902110942.pdf" target="_blank" rel="noopener" aria-disabled="true">Open in new tab</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============== Projects Section ============== -->
+  <section id="projects" class="section">
+    <h3>Projects</h3>
+    <div class="projects">
+      <div class="card">
+        <h4>Customer_Directory</h4>
+        <p>🚀 Just built a simple yet functional web app! I used HTML, CSS, Bootstrap, and JavaScript to create a responsive directory with basic CRUD functionality.</p>
+        <div style="margin-top:12px; display:flex; gap:8px; align-items:center;">
+          <a class="project-visit" href="https://moataz624.github.io/customer_directory/" target="_blank" rel="noopener">Visit Project</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============== Contact Section ============== -->
+  <section id="contact" class="section">
+    <h3>Contact Me</h3>
+    <form onsubmit="sendMessage(event)">
+      <input id="name" type="text" placeholder="Your Name" style="width:100%;padding:10px;margin:10px 0;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:rgba(6,18,36,0.6);color:white;">
+      <input id="email" type="email" placeholder="Email" style="width:100%;padding:10px;margin:10px 0;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:rgba(6,18,36,0.6);color:white;">
+      <textarea id="msg" rows="5" placeholder="Your Message" style="width:100%;padding:10px;margin:10px 0;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:rgba(6,18,36,0.6);color:white;"></textarea>
+      <button type="submit" class="resume-btn send-btn">Send</button>
+    </form>
+  </section>
+
+  <!-- ============== Let's Connect (Footer) ============== -->
+
+
+  <footer class="site-footer" role="contentinfo">
+    <!-- decorative wave -->
+    <svg class="footer-wave" viewBox="0 0 1200 120" preserveAspectRatio="none" aria-hidden="true"><path d="M0,0 C300,120 900,0 1200,100 L1200,120 L0,120 Z" fill="#021328"/></svg>
+
+    <div class="footer-inner">
+      <div class="footer-motto">
+        <h4><span class="accent">One small step today,</span> makes a big difference tomorrow.</h4>
+        <p>Let's start your project together — clear design, fast performance, and an experience that makes an impact.</p>
+      </div>
+
+      <div class="footer-actions">
+        <div class="connect" aria-label="Social links">
+          <a href="https://github.com/Moataz624" title="GitHub" aria-label="GitHub">
+            <!-- GitHub SVG -->
+            <svg class="icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false"><path d="M12 .5C5.73.5.75 5.48.75 11.77c0 4.92 3.18 9.09 7.59 10.56.56.1.76-.24.76-.53 0-.26-.01-.96-.01-1.88-3.09.67-3.74-1.49-3.74-1.49-.51-1.3-1.25-1.65-1.25-1.65-1.02-.7.08-.69.08-.69 1.13.08 1.73 1.16 1.73 1.16 1 .17 1.54.99 1.54.99.99 1.69 2.6 1.2 3.24.92.1-.72.39-1.2.71-1.48-2.47-.28-5.07-1.24-5.07-5.52 0-1.22.44-2.21 1.15-2.99-.12-.28-.5-1.42.11-2.97 0 0 .94-.3 3.08 1.14a10.6 10.6 0 0 1 2.8-.38c.95.01 1.9.13 2.8.38 2.14-1.44 3.08-1.14 3.08-1.14.61 1.55.23 2.69.11 2.97.71.78 1.15 1.77 1.15 2.99 0 4.29-2.61 5.24-5.09 5.52.4.35.76 1.04.76 2.1 0 1.52-.01 2.75-.01 3.12 0 .29.2.63.77.52 4.41-1.47 7.59-5.64 7.59-10.56C23.25 5.48 18.27.5 12 .5z"/></svg>
+            <span class="sr-only">GitHub</span>
+          </a>
+          <a href="www.linkedin.com/in/moataz-ahmad-9a90b92aa" title="LinkedIn" aria-label="LinkedIn">
+            <!-- LinkedIn SVG -->
+            <svg class="icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false"><path d="M4.98 3.5a2.5 2.5 0 1 1 .02 0zM3 8.98h4v12H3v-12zM9 8.98h3.84v1.64h.05c.54-1.02 1.86-2.09 3.83-2.09 4.09 0 4.84 2.69 4.84 6.19v7.26h-4v-6.43c0-1.53-.03-3.5-2.13-3.5-2.13 0-2.45 1.66-2.45 3.39v6.54H9v-12z"/></svg>
+            <span class="sr-only">LinkedIn</span>
+          </a>
+          <a href="mailto:moataza615@gmail.com" title="Email" aria-label="Email">
+            <!-- Email SVG -->
+            <svg class="icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
+            <span class="sr-only">Email</span>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer-bottom">© <span id="year"></span> Moataz Ahmed — Built with <span class="heart" aria-hidden="true">❤️</span></div>
+  </footer>
+
+  <!-- ============== Certificate Modal (hidden by default) ============== -->
+  <div id="cert-modal" class="modal-overlay" aria-hidden="true" role="dialog" aria-modal="true">
+    <div class="modal" role="document" aria-label="Certificate viewer">
+      <div class="modal-top">
+        <h4 id="modal-title">Certificate</h4>
+        <div>
+          <button id="open-new" class="resume-btn" style="padding:8px 12px">Open in new tab</button>
+          <button id="modal-close" class="close-x" aria-label="Close">✖</button>
+        </div>
+      </div>
+      <div class="modal-body">
+        <div class="pdf-view" id="pdf-view">
+          <!-- iframe will be injected here -->
+          <div style="padding:20px;color:#9fbfdc">No document to preview — replace certificate data-pdf attributes with actual PDF links.</div>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button id="modal-close-2" class="close-x">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ===== year
+    document.getElementById('year').textContent = new Date().getFullYear();
+    function sendMessage(e){ e.preventDefault(); alert('✅ Your message has been sent successfully!'); }
+
+    // ===== stars background (same implementation as before)
+    const canvas = document.getElementById('stars');
+    const ctx = canvas.getContext('2d');
+    let stars = [], w = 0, h = 0;
+    function rand(min,max){ return Math.random()*(max-min)+min; }
+    function resizeCanvas(){ w = canvas.width = window.innerWidth; h = canvas.height = window.innerHeight; initStars(Math.min(420, Math.floor((w*h)/8000)) || 300); }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+    function initStars(count=300){
+      stars = [];
+      for(let i=0;i<count;i++){ stars.push({ x:Math.random()*w, y:Math.random()*h, r:Math.random()*1.6+0.2, baseAlpha:rand(0.15,0.85), alpha:0, speed:rand(0.01,0.5), twinkleSpeed:rand(0.002,0.012), phase:Math.random()*Math.PI*2 }); }
+    }
+    function drawStars(){
+      ctx.clearRect(0,0,w,h);
+      for(const s of stars){
+        s.phase += s.twinkleSpeed; s.alpha = s.baseAlpha*(0.6 + 0.4*Math.sin(s.phase));
+        ctx.globalAlpha = s.alpha; ctx.beginPath(); ctx.fillStyle = '#ffffff'; ctx.arc(s.x,s.y,s.r,0,Math.PI*2); ctx.fill();
+      }
+      ctx.globalAlpha = 1;
+    }
+    function updateStars(){ for(const s of stars){ s.y -= s.speed; if(s.y < -5){ s.y = h + 5; s.x = Math.random()*w; } } }
+    function starsLoop(){ drawStars(); updateStars(); requestAnimationFrame(starsLoop); }
+    starsLoop();
+
+    // ===== reveal animation for sections
+    const sections = document.querySelectorAll('.section');
+    const observer = new IntersectionObserver(entries=>{
+      entries.forEach(e=>{
+        if(e.isIntersecting) e.target.classList.add('visible');
+      });
+    },{threshold:0.18});
+    sections.forEach(s=>observer.observe(s));
+
+    // ===== certificate modal logic (iframe viewer + open in new tab + close)
+    const modalOverlay = document.getElementById('cert-modal');
+    const pdfView = document.getElementById('pdf-view');
+    const modalTitle = document.getElementById('modal-title');
+    const openNewBtn = document.getElementById('open-new');
+    let currentPdfUrl = '';
+
+    document.querySelectorAll('.view-cert').forEach(btn=>{
+      btn.addEventListener('click', (e)=>{
+        const title = btn.getAttribute('data-title') || 'Certificate';
+        const pdf = btn.getAttribute('data-pdf') || '';
+        modalTitle.textContent = title;
+        currentPdfUrl = pdf;
+        // show overlay
+        modalOverlay.classList.add('show');
+        modalOverlay.setAttribute('aria-hidden','false');
+        // add iframe if pdf available, else show placeholder
+        renderPdf(pdf);
+        // set open-new link
+        openNewBtn.onclick = ()=>{ if(pdf) window.open(pdf,'_blank'); else alert('No PDF link provided. Replace data-pdf attribute with the certificate PDF URL.'); };
+      });
+    });
+
+    function renderPdf(pdfUrl){
+      pdfView.innerHTML = '';
+      if(!pdfUrl){
+        const info = document.createElement('div');
+        info.style.padding='20px'; info.style.color='#9fbfdc';
+        info.textContent = 'No document to preview — replace certificate data-pdf attributes with actual PDF links.';
+        pdfView.appendChild(info);
+        return;
+      }
+      const iframe = document.createElement('iframe');
+      iframe.src = pdfUrl;
+      iframe.title = 'Certificate preview';
+      pdfView.appendChild(iframe);
+    }
+
+    // close modal
+    document.getElementById('modal-close').addEventListener('click', closeModal);
+    document.getElementById('modal-close-2').addEventListener('click', closeModal);
+    modalOverlay.addEventListener('click', (e)=>{ if(e.target === modalOverlay) closeModal(); });
+    function closeModal(){
+      modalOverlay.classList.remove('show'); modalOverlay.setAttribute('aria-hidden','true');
+      pdfView.innerHTML = '<div style="padding:20px;color:#9fbfdc">No document to preview — replace certificate data-pdf attributes with actual PDF links.</div>';
+      currentPdfUrl = '';
+    }
+
+    // (Intro modal logic removed — 'Watch Intro' opens Drive directly)
+
+    // ===== small enhancement: hide logo-placeholder when actual <img> loads
+    document.querySelectorAll('.edu-logo-wrap img, .skill-logo').forEach(img=>{
+      img.addEventListener('load', (e)=>{
+        const parent = img.parentElement;
+        const placeholder = parent.querySelector('.logo-placeholder');
+        if(placeholder) placeholder.style.display='none';
+      });
+      // if src is empty, keep placeholder visible
+      if(!img.getAttribute('src')){ img.style.display='none'; }
+    });
+
+    // ===== hover for hero planet
+    const planetImg = document.querySelector('.planet img');
+    if(planetImg){
+      planetImg.addEventListener('mouseenter', ()=> planetImg.style.transform = 'scale(1.04)');
+      planetImg.addEventListener('mouseleave', ()=> planetImg.style.transform = 'scale(1)');
+    }
+
+    // ===== accessibility: close modals on ESC
+    window.addEventListener('keydown', e=>{
+      if(e.key === 'Escape'){
+        try{ closeModal(); }catch(err){}
+        try{ closeIntroModal(); }catch(err){}
+      }
+    });
+
+    // ===== notes for you (no JS action required):
+    // - Replace each <img src=""> empty with your actual logo file name (e.g. "dotnet-logo.png")
+    // - In Certificates cards: each "View Certificate" button has data-pdf="" attribute. Put your PDF url there (relative path like "cert1.pdf" or remote URL).
+    // - The "Open in new tab" anchor beside each certificate is intentionally empty; replace href="" with the pdf link for direct open.
+    // Example change:
+    // <button class="view-cert" data-title="..." data-pdf="certs/mec-2023.pdf">View Certificate</button>
+    // <a class="resume-btn" href="certs/mec-2023.pdf" target="_blank">Open in new tab</a>
+  </script>
+ 
+</body>
+</html>

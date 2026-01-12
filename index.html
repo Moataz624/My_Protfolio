@@ -18,7 +18,9 @@
       --glass: rgba(2,19,40,0.88);
     }
 
-    *{box-sizing:border-box;scroll-behavior:smooth}
+  /* make images and media scale on small screens */
+  *{box-sizing:border-box;scroll-behavior:smooth}
+  img, video, iframe{max-width:100%;height:auto;display:block}
     html,body{height:100%}
     body{
       margin:0;
@@ -29,23 +31,39 @@
       overflow-x:hidden;
     }
 
-    /* ================= Header (sticky) ================= */
+    /* ================= Header (fixed) ================= */
     header{
       width:100%;
-      position:sticky;
+      position:fixed;
       top:0;
+      left:0;
+      right:0;
       background:var(--glass);
       backdrop-filter:blur(8px);
       z-index:120;
       display:flex;
+      flex-direction:row;
       justify-content:space-between;
       align-items:center;
-      max-width:1100px;
-      margin:auto;
-      padding:14px 20px;
-      border-bottom:1px solid rgba(255,255,255,0.04);
+      padding:14px 40px;
+    }
+    .header-left, .header-right{
+      flex:1;
+    }
+    .header-left{
+      text-align:left;
+    }
+    .header-right{
+      text-align:right;
+    }
+    /* Nav always visible - no toggle */
+    header nav{
+      display:flex; align-items:center; gap:6px;
+      flex:2;
+      justify-content:center;
     }
     header h1{ font-family:'Orbitron',sans-serif; color:#9bd3ff; margin:0; font-size:1.1rem }
+    .nav-toggle{ display:inline-flex }
     nav a{ margin:0 10px; color:#b7dff7; text-decoration:none; font-weight:500;}
     nav a:hover{ color:white; }
     .resume-btn{
@@ -74,9 +92,11 @@
       max-width:1100px;
       margin:auto;
       position:relative;
-      padding:60px 20px;
-      min-height:420px;
+      padding:100px 20px 60px 20px;
+      min-height:100vh;
       z-index:2;
+      display:flex;
+      align-items:center;
     }
 
     .planet-wrap{
@@ -123,7 +143,6 @@
   .intro-content .watch-btn{ margin-top:14px; }
   .intro-video{ flex:1 1 420px; max-width:640px; border-radius:12px; overflow:hidden; box-shadow:0 12px 40px rgba(2,6,23,0.6); background:#000; }
   .intro-video video{ width:100%; height:auto; display:block; }
-  @media (max-width:900px){ .intro-section{ flex-direction:column-reverse; gap:18px; } .intro-video{ width:100%; } }
 
   /* Modal overrides (re-using modal styles) */
   .modal-overlay{ display:none; align-items:center; justify-content:center; position:fixed; inset:0; background:rgba(1,4,12,0.75); z-index:500; }
@@ -164,15 +183,21 @@
     }
     .skills-box h4{ margin-top:0; margin-bottom:10px; }
     .skill-item{ display:flex; gap:12px; align-items:center; margin-bottom:14px; }
-    .skill-meta{ display:flex; gap:10px; align-items:center; width:40%; min-width:140px; }
+    .skill-meta{ display:flex; gap:10px; align-items:center; width:40%; min-width:140px; position:relative; }
     .skill-meta img.skill-logo{
       width:26px; height:26px; object-fit:contain; border-radius:6px; background:transparent;
-      display:inline-block;
+      display:inline-block; flex-shrink:0;
     }
     /* placeholder for empty logos */
     .logo-placeholder{
       width:26px; height:26px; border-radius:6px; border:1px dashed rgba(255,255,255,0.08);
-      display:inline-flex; align-items:center; justify-content:center; font-size:9px; color:#9fbfdc;
+      display:none; align-items:center; justify-content:center; font-size:9px; color:#9fbfdc;
+      flex-shrink:0;
+    }
+    /* Show placeholder only when image fails to load */
+    .skill-meta img.skill-logo[style*="display: none"] + .logo-placeholder,
+    .skill-meta img.skill-logo[style*="display:none"] + .logo-placeholder{
+      display:inline-flex;
     }
 
     .progress-bar{ flex:1; background:#07223a; border-radius:10px; height:10px; overflow:hidden; }
@@ -180,8 +205,11 @@
 
     /* ================= Education cards: add logo + text ================= */
     .edu-card{ display:flex; gap:12px; align-items:center; }
-    .edu-logo-wrap{ width:56px; height:56px; border-radius:10px; overflow:hidden; flex-shrink:0; display:flex; align-items:center; justify-content:center; background:rgba(255,255,255,0.02); border:1px dashed rgba(255,255,255,0.03); }
-    .edu-logo-wrap img{ width:100%; height:100%; object-fit:contain; display:block; }
+    .edu-logo-wrap{ width:56px; height:56px; border-radius:10px; overflow:hidden; flex-shrink:0; display:flex; align-items:center; justify-content:center; background:rgba(255,255,255,0.02); border:1px dashed rgba(255,255,255,0.03); position:relative; }
+    .edu-logo-wrap img{ width:100%; height:100%; object-fit:contain; display:block; position:absolute; top:0; left:0; }
+    .edu-logo-wrap .logo-placeholder{ position:absolute; top:0; left:0; width:100%; height:100%; display:none; border:none; border-radius:0; }
+    .edu-logo-wrap img[style*="display: none"] + .logo-placeholder,
+    .edu-logo-wrap img[style*="display:none"] + .logo-placeholder{ display:flex; }
     .edu-text small{ color:#9fbfdc; display:block; margin-top:6px; font-size:0.92rem; opacity:0.95 }
 
     /* ================= Certificates modal/ popup ================= */
@@ -234,21 +262,118 @@
     .heart{ display:inline-block; transform-origin:center center; animation:beat 1.6s infinite; }
     @keyframes beat{ 0%,100%{ transform:scale(1) } 50%{ transform:scale(1.08) } }
 
-    @media (max-width:760px){
-      .footer-inner{ flex-direction:column; gap:12px; align-items:center; }
-      .footer-motto{ text-align:center; }
-      .footer-actions{ justify-content:center; }
-    }
-
     /* Contact form send button styling */
     .send-btn{ display:inline-flex; margin-top:6px; padding:10px 18px; border-radius:18px; font-weight:700; cursor:pointer; border:none; }
 
-    /* Responsive tweaks */
-    @media (max-width:980px){
-      .hero-content{ padding-left:0; max-width:100% }
-      .hero{ padding:40px 14px; min-height:300px; }
-      .planet-wrap{ display:none; }
-      .skill-meta{ width:48%; min-width:110px }
+    /* ================= Mobile Responsiveness ================= */
+    
+    /* Tablet screens */
+    @media (max-width: 900px){
+      header{ padding:12px 20px; }
+      .header-left, .header-right{ flex:1; }
+      header nav{ gap:4px; }
+      nav a{ margin:0 6px; font-size:0.9rem; }
+      .hero-content{ padding-left:320px; }
+    }
+
+    /* Mobile screens */
+    @media (max-width: 768px){
+      header{ 
+        padding:10px 15px; 
+        flex-wrap:wrap;
+        gap:10px;
+      }
+      .header-left{ 
+        order:1; 
+        flex:1; 
+        text-align:left; 
+      }
+      .header-right{ 
+        order:2; 
+        flex:0; 
+        text-align:right; 
+      }
+      header nav{ 
+        order:3; 
+        flex:100%; 
+        justify-content:center; 
+        flex-wrap:wrap;
+        gap:8px;
+        padding-top:8px;
+        border-top:1px solid rgba(255,255,255,0.05);
+      }
+      header h1{ font-size:1rem; }
+      nav a{ margin:0 8px; font-size:0.85rem; }
+      .resume-btn{ padding:7px 12px; font-size:0.85rem; }
+      
+      .hero{ 
+        padding:120px 15px 40px 15px; 
+        min-height:auto; 
+        display:flex; 
+        flex-direction:column; 
+        align-items:center; 
+        gap:20px; 
+      }
+      .planet-wrap{ 
+        position:relative; 
+        left:auto; 
+        top:auto; 
+        transform:none;
+        width:180px; 
+        height:180px; 
+        order:-1; 
+        margin-bottom:20px;
+      }
+      .hero-content{ 
+        max-width:100%; 
+        padding-left:0; 
+        text-align:center; 
+      }
+      .hero h2{ font-size:1.4rem; }
+      .hero p{ font-size:0.95rem; max-width:100%; }
+      
+      .section{ padding:0 15px; margin:40px auto; }
+      .section h3{ font-size:1.3rem; }
+      
+      .skills-container{ grid-template-columns:1fr; gap:15px; }
+      .skill-item{ flex-direction:column; gap:8px; align-items:flex-start; }
+      .skill-meta{ width:100%; }
+      .progress-bar{ width:100%; }
+      
+      .projects{ grid-template-columns:1fr; }
+      .edu-card{ flex-direction:column; text-align:center; gap:10px; }
+      
+      .intro-section{ flex-direction:column; gap:20px; }
+      .intro-video{ max-width:100%; }
+      
+      .footer-inner{ flex-direction:column; gap:20px; text-align:center; }
+      .footer-motto{ text-align:center; }
+      .footer-actions{ justify-content:center; }
+      .connect{ justify-content:center; }
+    }
+
+    /* Small mobile screens */
+    @media (max-width: 480px){
+      header{ padding:8px 10px; }
+      header h1{ font-size:0.9rem; }
+      nav a{ margin:0 5px; font-size:0.8rem; }
+      .resume-btn{ padding:6px 10px; font-size:0.8rem; }
+      
+      .hero{ padding:110px 10px 30px 10px; }
+      .planet-wrap{ width:140px; height:140px; }
+      .hero h2{ font-size:1.2rem; }
+      .hero p{ font-size:0.9rem; }
+      
+      .section{ padding:0 10px; margin:30px auto; }
+      .section h3{ font-size:1.15rem; }
+      
+      .card{ padding:14px; }
+      .skills-box{ padding:14px; }
+      
+      .edu-logo-wrap{ width:48px; height:48px; }
+      
+      .footer-motto h4{ font-size:1.1rem; }
+      .connect a{ padding:8px 10px; font-size:0.85rem; }
     }
   </style>
 </head>
@@ -257,7 +382,9 @@
 
   <!-- ============== Header ============== -->
   <header>
-    <h1>Moataz Ahmed</h1>
+    <div class="header-left">
+      <h1>Moataz Ahmed</h1>
+    </div>
     <nav>
       <a href="#about">About</a>
       <a href="#skills">Skills</a>
@@ -265,9 +392,10 @@
       <a href="#certificates">Certificates</a>
       <a href="#projects">Projects</a>
       <a href="#contact">Contact</a>
-      <!-- Resume file placeholder (you uploaded original resume PDF earlier) -->
-      <a class="resume-btn" href="Moataz-Ahmed-Ramadan-Said-FlowCV-Resume-20251006.pdf" target="_blank">Resume</a>
     </nav>
+    <div class="header-right">
+      <a class="resume-btn" href="Moataz-Ahmed-Ramadan-Said-FlowCV-Resume-20251006.pdf" target="_blank">Resume</a>
+    </div>
   </header>
 
   <!-- ============== Hero ============== -->
@@ -453,7 +581,7 @@
       <div class="card edu-card">
         <div class="edu-logo-wrap">
           <!-- PLACEHOLDER: BSU logo already provided by you can replace src -->
-          <img src="download (1).png" alt="BSU logo" onerror="this.style.display='none'">
+          <img src="download (2).png" alt="BSU logo" onerror="this.style.display='none'">
           <div class="logo-placeholder" aria-hidden="true">BSU</div>
         </div>
         <div class="edu-text">
@@ -466,7 +594,7 @@
       <div class="card edu-card">
         <div class="edu-logo-wrap">
           <!-- PLACEHOLDER: DEPI logo (you provided) -->
-          <img src="download (2).png" alt="DEPI logo" onerror="this.style.display='none'">
+          <img src="download (1).png" alt="DEPI logo" onerror="this.style.display='none'">
           <div class="logo-placeholder" aria-hidden="true">DEPI</div>
         </div>
         <div class="edu-text">
@@ -698,6 +826,25 @@
         try{ closeIntroModal(); }catch(err){}
       }
     });
+
+    // ===== mobile nav toggle behavior =====
+    (function(){
+      const headerEl = document.querySelector('header');
+      const toggle = document.querySelector('.nav-toggle');
+      const navLinks = headerEl.querySelectorAll('nav a');
+      function closeNav(){ headerEl.classList.remove('nav-open'); headerEl.classList.add('nav-closed'); toggle.setAttribute('aria-expanded','false'); }
+      function openNav(){ headerEl.classList.remove('nav-closed'); headerEl.classList.add('nav-open'); toggle.setAttribute('aria-expanded','true'); }
+      // start closed on small screens
+      headerEl.classList.add('nav-closed');
+      toggle.addEventListener('click', ()=>{ if(headerEl.classList.contains('nav-open')) closeNav(); else openNav(); });
+      // close when a nav link is clicked (mobile)
+      navLinks.forEach(a=>a.addEventListener('click', ()=>{ if(window.innerWidth <= 980) closeNav(); }));
+      // ensure nav is visible when resizing to large screens
+      window.addEventListener('resize', ()=>{
+        if(window.innerWidth > 980){ headerEl.classList.remove('nav-closed','nav-open'); toggle.setAttribute('aria-expanded','false'); }
+        else { headerEl.classList.add('nav-closed'); }
+      });
+    })();
 
     // ===== notes for you (no JS action required):
     // - Replace each <img src=""> empty with your actual logo file name (e.g. "dotnet-logo.png")
